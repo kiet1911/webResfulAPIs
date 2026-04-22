@@ -1,8 +1,7 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
-using System.Text.Json;
 using webResfulAPIs.Helpers.Tokens;
+using webResfulAPIs.Models;
 
 namespace webResfulAPIs.Controllers
 {
@@ -10,6 +9,10 @@ namespace webResfulAPIs.Controllers
     [Route("api/[controller]/[action]")]
     public class WeatherForecastController : ControllerBase
     {
+
+        private AppDbContext appDbContext;
+
+
         private static readonly string[] Summaries = new[]
         {
             "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
@@ -18,11 +21,45 @@ namespace webResfulAPIs.Controllers
         private readonly ILogger<WeatherForecastController> _logger;
         private readonly IConfiguration _configuration;
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger , IConfiguration configuration)
+        public WeatherForecastController(ILogger<WeatherForecastController> logger, IConfiguration configuration, AppDbContext context)
         {
             _logger = logger;
             _configuration = configuration;
+            appDbContext = context;
         }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> test_add()
+        {
+            //new users 
+            Users user = new Users();
+            user.Email = "droang02@gmail.com";
+            user.Password = "this is hash password";
+
+            //new profiles 
+            Profiles profiles = new Profiles { 
+                Full_Name = "Nguyễn Văn",
+                Display_Name = "A",
+                User = user
+            };
+            try
+            {
+                appDbContext.Profiles.Add(profiles);
+                await appDbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+
+            }
+            return Ok(new
+            {
+                status = 200,
+                message = "create success!"
+            });
+        }
+
         [Authorize]
         [HttpGet(Name = "GetWeatherForecast")]
         public IEnumerable<WeatherForecast> Get()
@@ -52,8 +89,8 @@ namespace webResfulAPIs.Controllers
             //access
             var accessToken = GenerateTokens.GenerateAccessTokens(_configuration);
             var refreshToken = GenerateTokens.GenerateRefreshTokens();
-            var jsonToken = new { accessToken = accessToken , refreshToken = refreshToken };
-            Response.Cookies.Append("accessToken", accessToken , options);
+            var jsonToken = new { accessToken = accessToken, refreshToken = refreshToken };
+            Response.Cookies.Append("accessToken", accessToken, options);
             //refresh 
             return Ok(jsonToken);
         }

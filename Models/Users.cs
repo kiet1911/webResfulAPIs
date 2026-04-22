@@ -11,9 +11,10 @@ namespace webResfulAPIs.Models
         public string? Phone { get; set; }
         public DateTime? Email_verify { get; set; }
         public EnumStores.UserStatus Status { get; set; } = EnumStores.UserStatus.Active;
-        public string Role { get; set; } = "User";
+        public string Role { get; set; } = "Users";
         public DateTime Created_at { get; set; }
         public DateTime Updated_at { get; set; }
         public DateTime? Deleted_at { get;set; }
+        public virtual ICollection<RefreshTokens> RefreshTokens { get; set; } = new List<RefreshTokens>();
     }
 }
