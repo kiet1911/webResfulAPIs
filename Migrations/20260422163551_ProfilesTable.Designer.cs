@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using webResfulAPIs.Models;
 
@@ -11,9 +12,11 @@ using webResfulAPIs.Models;
 namespace webResfulAPIs.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260422163551_ProfilesTable")]
+    partial class ProfilesTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -83,58 +86,7 @@ namespace webResfulAPIs.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_Profiles_User_Id");
 
-                    b.ToTable("Profiles", null, t =>
-                        {
-                            t.HasCheckConstraint("CK_Profiles_Gender", "gender IN ('Male','Female','Others')");
-                        });
-                });
-
-            modelBuilder.Entity("webResfulAPIs.Models.RefreshTokens", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("Created_at")
-                        .HasColumnType("datetime")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("Created_by_ip")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(256)")
-                        .HasColumnName("created_by_ip");
-
-                    b.Property<DateTime>("Expired_date")
-                        .HasColumnType("datetime")
-                        .HasColumnName("expired_date");
-
-                    b.Property<bool>("Is_revoked")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false)
-                        .HasColumnName("is_revoked");
-
-                    b.Property<string>("Token")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(256)")
-                        .HasColumnName("token");
-
-                    b.Property<int>("User_id")
-                        .HasColumnType("int")
-                        .HasColumnName("user_id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Token")
-                        .IsUnique()
-                        .HasDatabaseName("IX_RefreshTokens_Token");
-
-                    b.HasIndex("User_id");
-
-                    b.ToTable("RefreshTokens", (string)null);
+                    b.ToTable("Profiles", (string)null);
                 });
 
             modelBuilder.Entity("webResfulAPIs.Models.Users", b =>
@@ -229,22 +181,6 @@ namespace webResfulAPIs.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("webResfulAPIs.Models.RefreshTokens", b =>
-                {
-                    b.HasOne("webResfulAPIs.Models.Users", "User")
-                        .WithMany("RefreshTokens")
-                        .HasForeignKey("User_id")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("webResfulAPIs.Models.Users", b =>
-                {
-                    b.Navigation("RefreshTokens");
                 });
 #pragma warning restore 612, 618
         }
