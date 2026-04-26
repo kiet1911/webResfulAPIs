@@ -1,10 +1,7 @@
-﻿using Microsoft.AspNetCore.Authentication.BearerToken;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using System.Text.Unicode;
 using webResfulAPIs.Models;
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,13 +10,16 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
 //cors
-//builder.Services.AddCors(options =>
-//{
-//    options.AddDefaultPolicy(p =>
-//    {
-//        p.WithOrigins("https://google.com");
-//    });
-//});
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy( policy =>
+    {
+        policy.WithOrigins("http://localhost:5173") // Địa chỉ của Frontend
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials();
+    });
+});
 
 //sql server
 builder.Services.AddDbContext<AppDbContext>(option =>
@@ -35,7 +35,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateAudience = true,
-        ValidateIssuer = true ,
+        ValidateIssuer = true,
         ValidateIssuerSigningKey = true,
         ValidAudience = builder.Configuration["Secret:audience"],
         ValidIssuer = builder.Configuration["Secret:issuer"],
@@ -87,11 +87,11 @@ if (app.Environment.IsDevelopment())
     app.UseDeveloperExceptionPage();
 }
 app.UseStaticFiles();
-
-app.UseRouting();
 app.UseHttpsRedirection();
+app.UseRouting();
 
-//app.UseCors();
+
+app.UseCors();
 
 app.UseAuthentication();
 app.UseAuthorization();

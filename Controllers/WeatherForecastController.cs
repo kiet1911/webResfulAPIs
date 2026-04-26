@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using webResfulAPIs.Helpers.Tokens;
 using webResfulAPIs.Models;
-
+using BC = BCrypt.Net.BCrypt;
 namespace webResfulAPIs.Controllers
 {
     [ApiController]
@@ -35,7 +35,7 @@ namespace webResfulAPIs.Controllers
             //new users 
             Users user = new Users();
             user.Email = "droang02@gmail.com";
-            user.Password = "this is hash password";
+            user.Password = BC.HashPassword("this is hash password");
 
             //new profiles 
             Profiles profiles = new Profiles { 
