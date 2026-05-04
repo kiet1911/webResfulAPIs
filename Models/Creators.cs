@@ -11,5 +11,6 @@ namespace webResfulAPIs.Models
         public DateTime Created_at { get; set; }
         public DateTime Updated_at { get; set; }
         public EnumStores.CreatorStatus Status { get; set; } = EnumStores.CreatorStatus.Active;
+        public virtual ICollection<BoardGameCreators> BoardGameCreators { get; set; } = new List<BoardGameCreators>();
     }
 }

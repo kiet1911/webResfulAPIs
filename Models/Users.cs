@@ -16,5 +16,6 @@ namespace webResfulAPIs.Models
         public DateTime Updated_at { get; set; }
         public DateTime? Deleted_at { get;set; }
         public virtual ICollection<RefreshTokens> RefreshTokens { get; set; } = new List<RefreshTokens>();
+        public virtual ICollection<Favorites> Favorites { get; set; } = new List<Favorites>();
     }
 }

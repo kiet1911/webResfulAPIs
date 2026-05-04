@@ -26,6 +26,9 @@ namespace webResfulAPIs.Models
         public decimal Rating { get; set; }
         public int Age_Requirement { get; set; }
         public virtual ICollection<BoardGameImages> BoardGameImages { get; set; } = new List<BoardGameImages>();
+        public virtual ICollection<BoardGameCategory> BoardGameCategories { get; set; } = new List<BoardGameCategory>();
+        public virtual ICollection<BoardGameCreators> BoardGameCreators { get; set; } = new List<BoardGameCreators>();
+        public virtual ICollection<Favorites> Favorites { get; set; } = new List<Favorites>();
         public void handleUpdatedTime()
         {
             this.Updated_at = DateTime.UtcNow;

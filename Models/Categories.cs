@@ -10,5 +10,6 @@ namespace webResfulAPIs.Models
         public DateTime Created_at { get; set; }
         public DateTime Updated_at { get; set; }
         public EnumStores.CategoryStatus Status { get; set; } = EnumStores.CategoryStatus.Active;
+        public virtual ICollection<BoardGameCategory> BoardGameCategories { get; set; } = new List<BoardGameCategory>();
     }
 }
