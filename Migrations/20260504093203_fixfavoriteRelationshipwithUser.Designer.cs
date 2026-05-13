@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using webResfulAPIs.Models;
 
@@ -11,9 +12,11 @@ using webResfulAPIs.Models;
 namespace webResfulAPIs.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260504093203_fixfavoriteRelationshipwithUser")]
+    partial class fixfavoriteRelationshipwithUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -434,9 +437,9 @@ namespace webResfulAPIs.Migrations
 
                     b.ToTable("Creators", null, t =>
                         {
-                            t.HasCheckConstraint("CK_Creators_Status", "status IN ('Active', 'Inactive', 'Banned')");
+                            t.HasCheckConstraint("CK_Creators_Status", "status IN ('Active', 'Inactive', 'OutStock')");
 
-                            t.HasCheckConstraint("CK_Creators_Type", "type IN ('Author','Artist')");
+                            t.HasCheckConstraint("CK_Creators_Type", "type IN ('Active','Inactive','Banned')");
                         });
                 });
 

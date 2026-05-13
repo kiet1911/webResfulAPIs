@@ -20,7 +20,7 @@ namespace webResfulAPIs.Models.EntitiesType
 
             //relationship
             builder.HasOne(p => p.BoardGame).WithMany(p => p.Favorites).HasForeignKey(p => p.BoardGame_Id).OnDelete(DeleteBehavior.Cascade);
-            builder.HasOne(p => p.User).WithMany(p => p.Favorites).HasForeignKey(p => p.BoardGame_Id).OnDelete(DeleteBehavior.Cascade);
+            builder.HasOne(p => p.User).WithMany(p => p.Favorites).HasForeignKey(p => p.User_Id).OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

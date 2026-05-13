@@ -7,7 +7,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+});
 
 //cors
 builder.Services.AddCors(options =>
@@ -48,7 +51,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 
             var token = context.Request.Cookies["accessToken"];
             context.Token = token;
-            Console.WriteLine($"Token nhận được từ Cookie: {token}"); // Kiểm tra xem có bị dư dấu "" không
+            Console.WriteLine($"Token nhận được từ Cookie: {token}");
 
             return Task.CompletedTask;
         },
