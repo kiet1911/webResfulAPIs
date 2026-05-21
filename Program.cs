@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json.Linq;
 using System.Text;
 using webResfulAPIs.Models;
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +12,9 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
 });
+
+// cache response 
+builder.Services.AddResponseCaching();
 
 //cors
 builder.Services.AddCors(options =>
@@ -48,8 +52,18 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
     {
         OnMessageReceived = (context) =>
         {
-
-            var token = context.Request.Cookies["accessToken"];
+            var token = context.Request.Cookies["AccessToken"];
+            var refreshcheck = context.Request.Cookies["RefreshToken"];
+            if (String.IsNullOrEmpty(token) || String.IsNullOrEmpty(refreshcheck))
+            {
+                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                context.Response.ContentType = "application/json";
+                return context.Response.WriteAsJsonAsync(new
+                {
+                    status = 401,
+                    message = "Access Token not exist"
+                });
+            }
             context.Token = token;
             Console.WriteLine($"Token nhận được từ Cookie: {token}");
 
@@ -67,13 +81,19 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
             context.HandleResponse();
             context.Response.StatusCode = StatusCodes.Status401Unauthorized;
             context.Response.ContentType = "application/json";
-
+            Console.WriteLine($"Token het han");
             return context.Response.WriteAsJsonAsync(new
             {
                 status = 401,
                 error = "unAuthentication"
             });
-        }
+        },
+       OnTokenValidated = (context) =>
+       {
+           Console.WriteLine($"Token accept");
+           
+           return Task.CompletedTask;
+       }
     };
 });
 

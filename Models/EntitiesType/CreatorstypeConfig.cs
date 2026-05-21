@@ -26,7 +26,7 @@ namespace webResfulAPIs.Models.EntitiesType
             //constraint
             builder.ToTable("Creators", t =>
             {
-                t.HasCheckConstraint("CK_Creators_Type", "type IN ('Author','Artist')");
+                t.HasCheckConstraint("CK_Creators_Type", "type IN ('Author','Artist', 'Designer', 'Publisher')");
                 t.HasCheckConstraint("CK_Creators_Status", "status IN ('Active', 'Inactive', 'Banned')");
             });
 

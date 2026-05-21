@@ -5,7 +5,7 @@
         public enum UserStatus { Active, Inactive, Pending, Banned }
         public enum UserGender { Male, Female, Others }
         //creator
-        public enum CreatorTypes { Author, Artist }
+        public enum CreatorTypes { Author, Artist, Designer ,Publisher }
         public enum CreatorStatus { Active, Inactive, Banned }
         //boardgame
         public enum BoardGameStatus { Active, Inactive, OutStock }

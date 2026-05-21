@@ -9,6 +9,8 @@ namespace webResfulAPIs.Models
         public virtual DbSet<Profiles> Profiles { get; set; }
         public virtual DbSet<RefreshTokens> RefreshTokens { get; set; }
         public virtual DbSet<BoardGames> BoardGames { get; set; }
+        public virtual DbSet<BoardGameDescription> BoardGameDescriptions { get; set; }
+        public virtual DbSet<Favorites> Favorites { get; set; }
         public AppDbContext(DbContextOptions<AppDbContext> options):base(options) { 
         
         }

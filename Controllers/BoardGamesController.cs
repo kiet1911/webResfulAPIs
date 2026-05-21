@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using webResfulAPIs.Helpers.EnumsStore;
 using webResfulAPIs.Models;
 
 namespace webResfulAPIs.Controllers
@@ -16,6 +17,51 @@ namespace webResfulAPIs.Controllers
         {
             this.appDbContext = appDbContext;
             this.configuration = configuration;
+        }
+        [AllowAnonymous]
+        [HttpGet]
+        public async Task<IActionResult> Id([FromQuery] Guid guid)
+        {
+            Console.WriteLine("this is guid {0}", guid);
+            try
+            {
+                var description = await appDbContext.BoardGameDescriptions.Where(t => t.BoardGame_Id == guid).FirstOrDefaultAsync();
+
+                var boardGame = await appDbContext.BoardGames.Where(t => t.Id == guid).Include(bg => bg.BoardGameCreators).ThenInclude(bgc => bgc.Creator).Select(
+                    bg => new
+                    {
+                        bg.Id,
+                        bg.Name,
+                        bg.Base_Price,
+                        bg.Stock_Quantity,
+                        bg.Status,
+                        bg.Weight,
+                        bg.Size_X,
+                        bg.Size_Y,
+                        bg.Size_Z,
+                        bg.Min_Player,
+                        bg.Max_Player,
+                        bg.Min_Time,
+                        bg.Max_Time,
+                        bg.Prefer_Player,
+                        bg.Complexity,
+                        bg.Rating,
+                        bg.Age_Requirement,
+                        Creators = bg.BoardGameCreators.Select(bg => new { bg.Creator.Id, bg.Creator.Name, bg.Creator.Type }).ToList(),
+                        Categories = bg.BoardGameCategories.Select(bg=> new { bg.Category.Id , bg.Category.Name }).ToList(),
+                        Description = description
+                    }
+                    ).FirstOrDefaultAsync();
+                return Ok(boardGame);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    status = 400,
+                    message = ex.Message,
+                });
+            }
         }
         [AllowAnonymous]
         [HttpGet]

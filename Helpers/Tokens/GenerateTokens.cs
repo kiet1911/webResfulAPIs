@@ -49,7 +49,7 @@ namespace webResfulAPIs.Helpers.Tokens
                 IssuedAt = DateTime.UtcNow,
                 Issuer = configuration["Secret:issuer"],
                 Audience = configuration["Secret:audience"],
-                Expires = DateTime.UtcNow.AddDays(7),
+                Expires = DateTime.UtcNow.AddMinutes(5),
                 SigningCredentials = sign
             };
             var handler = new JsonWebTokenHandler();

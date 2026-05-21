@@ -5,6 +5,7 @@ using webResfulAPIs.Helpers.CookiesOptions;
 using webResfulAPIs.Helpers.Tokens;
 using webResfulAPIs.Models;
 using webResfulAPIs.Models.DTO;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 using BC = BCrypt.Net.BCrypt;
 
 namespace webResfulAPIs.Controllers
@@ -20,6 +21,61 @@ namespace webResfulAPIs.Controllers
         {
             this.appDbContext = appDbContext;
             this.configuration = configuration;
+        }
+        [AllowAnonymous]
+        [HttpPost]
+        public async Task<IActionResult> RefreshAccesToken()
+        {
+            //get refresh token api cookies
+            try
+            {
+                string? RefreshToken = null;
+                HttpContext.Request.Cookies.TryGetValue("RefreshToken", out RefreshToken);
+                if (string.IsNullOrEmpty(RefreshToken)) return Unauthorized("null refresh token");
+
+                //get last refresh if not expired
+                var refresh = await appDbContext.RefreshTokens.Include(t => t.User).OrderByDescending(t=>t.Expired_date).LastOrDefaultAsync(t => t.Token == RefreshToken);
+
+                if (refresh == null || refresh.Is_revoked) return Unauthorized();
+
+                if (refresh.Expired_date < DateTime.UtcNow)
+                {
+                    try
+                    {
+                        refresh.Is_revoked = true;
+
+                        appDbContext.RefreshTokens.Update(refresh);
+                        await appDbContext.SaveChangesAsync();
+
+                    }
+                    catch (Exception ex)
+                    {
+                        return Unauthorized();
+                    }
+
+                    return Unauthorized();
+                }
+
+                //begin refresh 
+
+                if (refresh.User == null) return Unauthorized();
+                var userProfile = await appDbContext.Profiles.FirstOrDefaultAsync(t => t.User_Id == refresh.User.Id);
+
+                if (userProfile == null) return Unauthorized();
+
+                string Access = GenerateTokens.GenerateAccessTokensWithUser(configuration, new UserRegisterDTO { UserName = userProfile.Full_Name }, refresh.User.Public_id);
+                HttpContext.Response.Cookies.Append("AccessToken", Access, CookieOptionsStore.optionForAccess);
+                return Ok(new
+                {
+                    status = 200,
+                    message = "Refresh success"
+                });
+
+            }
+            catch (Exception ex)
+            {
+                return Unauthorized();
+            }
         }
 
         [AllowAnonymous]
@@ -62,7 +118,7 @@ namespace webResfulAPIs.Controllers
 
                 //check if refresh still invoke -> supply old else gave new refresh
                 Profiles profile = await appDbContext.Profiles.FirstOrDefaultAsync(p => p.User_Id == user.Id);
-                var refresh = await appDbContext.RefreshTokens.FirstOrDefaultAsync(p => p.User_id == user.Id && p.Is_revoked == false && p.Expired_date > DateTime.UtcNow);           
+                var refresh = await appDbContext.RefreshTokens.FirstOrDefaultAsync(p => p.User_id == user.Id && p.Is_revoked == false && p.Expired_date > DateTime.UtcNow);
                 if (refresh != null)
                 {
                     string Access = GenerateTokens.GenerateAccessTokensWithUser(configuration, new UserRegisterDTO { UserName = profile.Full_Name }, user.Public_id);
@@ -97,14 +153,16 @@ namespace webResfulAPIs.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { 
+                return BadRequest(new
+                {
                     status = 400,
                     message = ex.Message,
                 });
 
             }
             //check and update refresh token
-            return Ok(new { 
+            return Ok(new
+            {
                 publicid = user.Public_id,
                 fullname = fullName
             });
@@ -114,7 +172,7 @@ namespace webResfulAPIs.Controllers
         [HttpPost]
         public async Task<IActionResult> Register([FromBody] UserRegisterDTO userRegisterDTO)
         {
-            if (String.IsNullOrWhiteSpace(userRegisterDTO.UserName) || String.IsNullOrWhiteSpace(userRegisterDTO.Email) || String.IsNullOrWhiteSpace(userRegisterDTO.Password))
+            if (System.String.IsNullOrWhiteSpace(userRegisterDTO.UserName) || System.String.IsNullOrWhiteSpace(userRegisterDTO.Email) || System.String.IsNullOrWhiteSpace(userRegisterDTO.Password))
             {
                 return BadRequest(new
                 {
