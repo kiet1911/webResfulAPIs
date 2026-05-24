@@ -10,9 +10,9 @@
         public object CustomResponse( string? error , string message , string statusCode ){
 
             return new { 
-                Error = error??"",
-                Message = message,
-                StatusCode = statusCode
+                error = error??"",
+                message = message,
+                status = statusCode
             };
         }
     }
