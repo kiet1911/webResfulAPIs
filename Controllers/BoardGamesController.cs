@@ -150,5 +150,34 @@ namespace webResfulAPIs.Controllers
                 });
             }
         }
+        [AllowAnonymous]
+        [HttpGet]
+        public async Task<IActionResult> Boardgames()
+        {
+            try
+            {
+                var boardGames = await appDbContext.BoardGames.Include(bg => bg.BoardGameCategories).ThenInclude(bgc => bgc.Category)
+               .Select(bg => new
+               {
+                   bg.Id,
+                   bg.Name,
+                   bg.Base_Price,
+                   bg.Sold_Quantity,
+                   bg.Created_at,
+                   bg.Rating,
+                   Categories = bg.BoardGameCategories.Select(bgc => new { bgc.Category_Id, bgc.Category.Name }).ToList()
+               })
+               .ToListAsync();
+                return Ok(boardGames);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    status = 400,
+                    message = ex.Message,
+                });
+            }
+        }
     }
 }
