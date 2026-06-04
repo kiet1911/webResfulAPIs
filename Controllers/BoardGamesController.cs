@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using webResfulAPIs.Helpers.EnumsStore;
 using webResfulAPIs.Models;
+using webResfulAPIs.Models.DTO;
 
 namespace webResfulAPIs.Controllers
 {
@@ -48,7 +48,7 @@ namespace webResfulAPIs.Controllers
                         bg.Rating,
                         bg.Age_Requirement,
                         Creators = bg.BoardGameCreators.Select(bg => new { bg.Creator.Id, bg.Creator.Name, bg.Creator.Type }).ToList(),
-                        Categories = bg.BoardGameCategories.Select(bg=> new { bg.Category.Id , bg.Category.Name }).ToList(),
+                        Categories = bg.BoardGameCategories.Select(bg => new { bg.Category.Id, bg.Category.Name }).ToList(),
                         Description = description
                     }
                     ).FirstOrDefaultAsync();
@@ -176,6 +176,83 @@ namespace webResfulAPIs.Controllers
                 {
                     status = 400,
                     message = ex.Message,
+                });
+            }
+        }
+        [AllowAnonymous]
+        [HttpPost]
+        [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new[] { "Price", "Playtime", "Rating", "Complexity", "Age", "Page", "PageSize" })]
+        public async Task<IActionResult> BoardGamesFilter([FromQuery] BoardGamesFilter Filters)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest("error data not full fill");
+            }
+            //begin query
+            try
+            {
+                var skiCount = Filters.Page * Filters.PageSize;
+
+                var gameFilter = await appDbContext.BoardGames.OrderBy(t => t.Id).Where(q => q.Base_Price <= Filters.Price && q.Max_Time <= Filters.Playtime && q.Rating <= Filters.Rating && q.Complexity <= Filters.Complexity && q.Age_Requirement <= Filters.Age).Skip(skiCount).Take(Filters.PageSize).Include(bg => bg.BoardGameCategories).ThenInclude(bgc => bgc.Category).Select(bg => new
+                {
+                    bg.Id,
+                    bg.Name,
+                    bg.Base_Price,
+                    bg.Sold_Quantity,
+                    bg.Created_at,
+                    bg.Rating,
+                    Categories = bg.BoardGameCategories.Select(bgc => new { bgc.Category_Id, bgc.Category.Name }).ToList()
+                }).ToListAsync();
+                return Ok(new
+                {
+                    gameLists = gameFilter,
+                    page = gameFilter?.Count == 0 ? (Filters.Page) : Filters.Page,
+                    isMax = gameFilter?.Count == 0 ? true : false,
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = "Internal server error"
+                });
+            }
+        }
+        [AllowAnonymous]
+        [HttpGet]
+        [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new[] { "Search", "Page", "PageSize" })]
+        public async Task<IActionResult> BoardGamesSearch([FromQuery] BoardGamesSearch searchfilter)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest("error data not full fill");
+            }
+            //begin query
+            try
+            {
+                var skiCount = searchfilter.Page * searchfilter.PageSize;
+                var gameFilter = await appDbContext.BoardGames.OrderBy(t => t.Id).Where(t => t.Name.Contains(searchfilter.Search.Trim())).Skip(skiCount).Take(searchfilter.PageSize).Select(bg => new
+                {
+                    bg.Id,
+                    bg.Name,
+                    bg.Base_Price,
+                    bg.Sold_Quantity,
+                    bg.Created_at,
+                    bg.Rating,
+                    Categories = bg.BoardGameCategories.Select(bgc => new { bgc.Category_Id, bgc.Category.Name }).ToList()
+                }).ToListAsync();
+                return Ok(new
+                {
+                    gameLists = gameFilter,
+                    page = gameFilter?.Count == 0 ? (searchfilter.Page) : searchfilter.Page,
+                    isMax = gameFilter?.Count == 0 ? true : false,
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = "Internal server error"
                 });
             }
         }

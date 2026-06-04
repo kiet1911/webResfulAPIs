@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Linq;
+using Scalar.AspNetCore;
 using System.Text;
 using webResfulAPIs.Models;
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +17,29 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 
 // cache response 
 builder.Services.AddResponseCaching();
+
+// scalar document 
+builder.Services.AddOpenApi((options) =>
+{
+    options.AddDocumentTransformer((document, context, cancellationToken) =>
+    {
+        var scheme = new OpenApiSecurityScheme
+        {
+            Type = SecuritySchemeType.Http,
+            Scheme = "Bearer",
+            BearerFormat = "JWT",
+            Description = "Enter yout Access token right here:"
+        };
+        document.Components ??= new OpenApiComponents();
+        document.Components.SecuritySchemes.Add("Bearer", scheme);
+        document.SecurityRequirements.Add(new OpenApiSecurityRequirement
+        {
+            [new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" } }] = Array.Empty<string>()
+        });
+        return Task.CompletedTask;
+    });
+});
+
 
 //cors
 builder.Services.AddCors(options =>
@@ -54,16 +79,16 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
         {
             var token = context.Request.Cookies["AccessToken"];
             var refreshcheck = context.Request.Cookies["RefreshToken"];
-            if (String.IsNullOrEmpty(token) || String.IsNullOrEmpty(refreshcheck))
-            {
-                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                context.Response.ContentType = "application/json";
-                return context.Response.WriteAsJsonAsync(new
-                {
-                    status = 401,
-                    message = "Access Token not exist"
-                });
-            }
+            //if (String.IsNullOrEmpty(token) || String.IsNullOrEmpty(refreshcheck))
+            //{
+            //    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            //    context.Response.ContentType = "application/json";
+            //    return context.Response.WriteAsJsonAsync(new
+            //    {
+            //        status = 401,
+            //        message = "Access Token not exist"
+            //    });
+            //}
             context.Token = token;
             Console.WriteLine($"Token nhận được từ Cookie: {token}");
 
@@ -108,6 +133,10 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.UseDeveloperExceptionPage();
+    app.MapScalarApiReference((options) =>
+    {
+        options.WithTitle("Board Game API of ProjectK").WithTheme(ScalarTheme.Moon).WithSearchHotKey("K");
+    });
 }
 app.UseStaticFiles();
 app.UseHttpsRedirection();
@@ -116,6 +145,7 @@ app.UseRouting();
 
 app.UseCors();
 
+app.UseResponseCaching();
 app.UseAuthentication();
 app.UseAuthorization();
 
