@@ -30,6 +30,7 @@ namespace webResfulAPIs.Models
         public virtual ICollection<BoardGameCategory> BoardGameCategories { get; set; } = new List<BoardGameCategory>();
         public virtual ICollection<BoardGameCreators> BoardGameCreators { get; set; } = new List<BoardGameCreators>();
         public virtual ICollection<Favorites> Favorites { get; set; } = new List<Favorites>();
+        public virtual ICollection<CartItems> CartItems { get; set; } = new List<CartItems>();
         public void handleUpdatedTime()
         {
             this.Updated_at = DateTime.UtcNow;
