@@ -12,5 +12,8 @@
         //category 
         public enum CategoryStatus { Active, Inactive, Banned }
         //bg_images
+
+        //orders
+        public enum OrderStatus { Pending, Paid, Cancel, Refund, Delivering}
     }
 }

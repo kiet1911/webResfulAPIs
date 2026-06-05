@@ -13,5 +13,6 @@ namespace webResfulAPIs.Models
         public DateTime Updated_at { get; set; } = DateTime.Now;
 
         public virtual ICollection<CartItems> CartItems { get; set; } = new List<CartItems>();
+        public virtual ICollection<Orders> Orders { get; set; } = new List<Orders>();
     }
 }
