@@ -14,6 +14,6 @@
         //bg_images
 
         //orders
-        public enum OrderStatus { Pending, Paid, Cancel, Refund, Delivering}
+        public enum OrderStatus { Pending, Confirmed, Cancelled, Refunded, Shipping, Delivered }
     }
 }

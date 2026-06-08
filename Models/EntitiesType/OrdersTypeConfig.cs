@@ -31,7 +31,7 @@ namespace webResfulAPIs.Models.EntitiesType
             builder.ToTable(t =>
             {
                 t.HasCheckConstraint("CK_Orders_ToTalPrice", "total_price >= 0");
-                t.HasCheckConstraint("CK_Orders_Status", "status in ('Pending','Paid','Cancel','Refund','Delivering') ");
+                t.HasCheckConstraint("CK_Orders_Status", "status in ('Pending','Confirmed','Cancelled','Refunded','Shipping', 'Delivered') ");
 
             });
         }
