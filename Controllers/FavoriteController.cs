@@ -27,7 +27,7 @@ namespace webResfulAPIs.Controllers
             Boolean isDelete = false;
             HttpContext.Request.Cookies.TryGetValue("RefreshToken", out refreshToken);
             var userDetailToken = User.Claims.FirstOrDefault(t => t.Type == "PublicId");
-            Console.WriteLine(userDetailToken.Value);
+            //Console.WriteLine(userDetailToken.Value);
             // try catch get if exits 
             try
             {
