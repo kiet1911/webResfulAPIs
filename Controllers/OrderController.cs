@@ -59,7 +59,7 @@ namespace webResfulAPIs.Controllers
                     //}
                 }
 
-                var cartSnapshot = cartUser.Select(t => new CartItemList.CartItemSnapshot { CartId = t.BoardgameId, Quantity = t.Quantity }).ToList();
+                var cartSnapshot = cartUser.Select(t => new CartItemList.CartItemSnapshot { CartId = t.BoardgameId, Quantity = t.Quantity , UnitPrice = t.UnitPrice }).ToList();
 
                 var tokenSnapshot = GenerateTokens.GenerateSnapshotOrder(configuration, cartSnapshot);
 
@@ -74,6 +74,7 @@ namespace webResfulAPIs.Controllers
                     message = "",
                     cartItems = cartUser.Select(t=>new {
                         CartId = t.BoardgameId,
+                        Name = t.BoardGames.Name,
                         Quantity = t.Quantity,
                         t.UnitPrice
                     
@@ -86,5 +87,6 @@ namespace webResfulAPIs.Controllers
                 return BadRequest(new ResponseConfigure().CustomResponse("error", ex.Message, "401"));
             }
         }
+       
     }
 }

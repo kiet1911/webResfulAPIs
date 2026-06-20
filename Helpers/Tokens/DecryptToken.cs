@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.IdentityModel.JsonWebTokens;
+﻿using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -7,7 +6,7 @@ namespace webResfulAPIs.Helpers.Tokens
 {
     public static class DecryptToken
     {
-        public static async Task DecryptJWTsnapShotToken(string JWT, IConfiguration configuration)
+        public static async Task<object> DecryptJWTsnapShotToken(string JWT, IConfiguration configuration)
         {
             try
             {
@@ -22,12 +21,22 @@ namespace webResfulAPIs.Helpers.Tokens
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretkey)),
                 };
                 var handler = new JsonWebTokenHandler();
-                var ClaimPrinciples = await handler.ValidateTokenAsync(JWT, tokenDescriptor);
-                if (ClaimPrinciples != null)
+                var result = await handler.ValidateTokenAsync(JWT, tokenDescriptor);
+                if (!result.IsValid)
                 {
-                    ClaimPrinciples.Claims.TryGetValue("productions", out var value);
-                    
+                    if(result.Exception is SecurityTokenExpiredException)
+                    {
+                        throw new Exception("Token expired");
+                    }
+                    throw new Exception(result.Exception?.Message ?? "Invalid token");
                 }
+                if (result?.Claims != null &&
+                 result.Claims.TryGetValue("cartSnapshot", out var value) &&
+                 !string.IsNullOrWhiteSpace(value.ToString()))
+                {
+                    return value;
+                }
+                return null;
             }
             catch (SecurityTokenExpiredException ex)
             {
