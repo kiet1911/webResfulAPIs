@@ -10,6 +10,7 @@ namespace webResfulAPIs.Models
         public string Name { get; set; } = string.Empty;
         public decimal Base_Price {  get; set; }
         public int Stock_Quantity { get; set; }
+        public int Reservation_Quantity { get; set; }
         public int Sold_Quantity { get; set; }
         public DateTime Created_at { get; set; }
         public DateTime Updated_at { get; set; }

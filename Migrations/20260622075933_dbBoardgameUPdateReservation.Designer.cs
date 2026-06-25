@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using webResfulAPIs.Models;
 
@@ -11,9 +12,11 @@ using webResfulAPIs.Models;
 namespace webResfulAPIs.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260622075933_dbBoardgameUPdateReservation")]
+    partial class dbBoardgameUPdateReservation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -625,11 +628,6 @@ namespace webResfulAPIs.Migrations
                         .HasDefaultValue(false)
                         .HasColumnName("isSuccess_delivery");
 
-                    b.Property<string>("MerchantRefNo")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("merchant_refno");
-
                     b.Property<string>("NameRecipient")
                         .IsRequired()
                         .HasColumnType("nvarchar(100)")
@@ -654,11 +652,6 @@ namespace webResfulAPIs.Migrations
                     b.Property<decimal>("TotalPrice")
                         .HasColumnType("decimal(18,2)")
                         .HasColumnName("total_price");
-
-                    b.Property<string>("UrlVnPay")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("url_vnpay");
 
                     b.Property<string>("note")
                         .HasColumnType("nvarchar(256)")

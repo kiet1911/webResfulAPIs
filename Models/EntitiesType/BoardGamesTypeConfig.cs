@@ -18,6 +18,7 @@ namespace webResfulAPIs.Models.EntitiesType
             builder.Property(p => p.Base_Price).HasColumnName("base_price").HasColumnType("decimal(18, 2)").IsRequired().HasDefaultValue(0.00);
             builder.Property(p => p.Stock_Quantity).HasColumnName("stock_quantity").HasColumnType("int").IsRequired().HasDefaultValue(0);
             builder.Property(p => p.Sold_Quantity).HasColumnName("sold_quantity").HasColumnType("int").IsRequired().HasDefaultValue(0);
+            builder.Property(p => p.Reservation_Quantity).HasColumnName("reservation_quantity").HasColumnType("int").IsRequired().HasDefaultValue(0);
             builder.Property(p => p.Created_at).HasColumnName("created_at").HasColumnType("datetime").IsRequired().HasDefaultValueSql("GETDATE()");
             builder.Property(p => p.Updated_at).HasColumnName("updated_at").HasColumnType("datetime").IsRequired().HasDefaultValueSql("GETDATE()");
             builder.Property(p => p.Status).HasColumnName("status").HasColumnType("nvarchar(100)").IsRequired().HasConversion<string>().HasDefaultValue(EnumStores.BoardGameStatus.Active);
@@ -39,6 +40,7 @@ namespace webResfulAPIs.Models.EntitiesType
             {
                 t.HasCheckConstraint("CK_BoardGames_Price", "base_price >= 0");
                 t.HasCheckConstraint("CK_BoardGames_Stock", "stock_quantity >= 0");
+                t.HasCheckConstraint("CK_BoardGames_Reservation", "reservation_quantity >=0");
                 t.HasCheckConstraint("CK_BoardGames_Sold", "sold_quantity >= 0");
                 t.HasCheckConstraint("CK_BoardGames_Weight", "weight >= 0");
                 t.HasCheckConstraint("CK_BoardGames_SizeX", "size_x >= 0");

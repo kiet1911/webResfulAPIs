@@ -5,6 +5,7 @@ using webResfulAPIs.Helpers.ObjectHelper;
 using webResfulAPIs.Helpers.Tokens;
 using webResfulAPIs.Models;
 using webResfulAPIs.Models.DTO;
+using static webResfulAPIs.Models.DTO.VnPayDTO;
 
 namespace webResfulAPIs.Controllers
 {
@@ -18,6 +19,112 @@ namespace webResfulAPIs.Controllers
         {
             this.configuration = configuration;
             this.appDbContext = appDbContext;
+        }
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> Detail([FromQuery] OrderDTO.OrderDetailDTO orderDetailDTO)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new ResponseConfigure().CustomResponse("error", "information not fulfill", "400"));
+            }
+            var transaction = await appDbContext.Database.BeginTransactionAsync();
+            try
+            {
+                var publicIdCookies = User.Claims.FirstOrDefault(t => t.Type == "PublicId");
+
+                if (publicIdCookies != null && orderDetailDTO.PublicId != publicIdCookies.Value)
+                {
+                    return StatusCode(StatusCodes.Status403Forbidden, new ResponseConfigure().CustomResponse("error", "User information (id) not match with request", "403"));
+                }
+
+                var UserCart = appDbContext.Carts.Where(t => t.User != null && publicIdCookies != null && t.User.Public_id == publicIdCookies.Value.ToString()).FirstOrDefault();
+
+                if (publicIdCookies == null || UserCart == null)
+                {
+                    return StatusCode(StatusCodes.Status403Forbidden, new ResponseConfigure().CustomResponse("error", "User information or cart does not exist", "403"));
+                }
+       
+                //get cart with orderid 
+                var UserOrder = await appDbContext.Orders.Where(t => t.Id.ToString() == orderDetailDTO.OrderId && t.CartId == UserCart.Id).Include(t=>t.OrderItems).ThenInclude(t=>t.BoardGame).ThenInclude(t=>t.BoardGameImages).FirstOrDefaultAsync();
+                if(UserOrder == null)
+                {
+                    return StatusCode(StatusCodes.Status403Forbidden, new ResponseConfigure().CustomResponse("error", "User Order not found", "403"));
+                }
+
+                return Ok(new
+                {
+                    status = 200,
+                    message = "",
+                    data = new
+                    {
+                        UserOrder.NameRecipient,
+                        UserOrder.Address,
+                        UserOrder.Phone,
+                        UserOrder.note,
+                        UserOrder.Id,
+                        UserOrder.TotalPrice,
+                        UserOrder.Status,
+                        UserOrder.IsSuccessDelivery,
+                        UserOrder.UrlVnPay,
+                        UserOrder.Created_at,
+                        OrderItems = UserOrder.OrderItems.ToList().Select(t => new
+                        {
+                            t.UnitPrice,
+                            t.Quantity,
+                            BoardGame = new
+                            {
+                                t.BoardGame.Name,
+                                t.BoardGame.Id,
+                                BoardGameImage = t.BoardGame.BoardGameImages.ToList()
+                            }
+                        })
+                    }
+                });
+            }
+            catch(Exception ex)
+            {
+                await transaction.RollbackAsync();
+                return BadRequest(new ResponseConfigure().CustomResponse("error", ex.Message, "401"));
+            }
+        }
+
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> Id([FromQuery] string id)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new ResponseConfigure().CustomResponse("error", "information not fulfill", "401"));
+            }
+            //user public id 
+            var publicIdCookies = User.Claims.FirstOrDefault(t => t.Type == "PublicId");
+            var UserCart = appDbContext.Carts.Where(t => t.User != null && publicIdCookies != null && t.User.Public_id == publicIdCookies.Value.ToString()).FirstOrDefault();
+
+            if (publicIdCookies == null || UserCart == null || id != publicIdCookies.Value) return StatusCode(StatusCodes.Status403Forbidden,
+            new ResponseConfigure().CustomResponse("error", "User information or cart does not exist", "403")
+            );
+
+            try
+            {
+                var orders = await appDbContext.Orders.Where(t => t.CartId == UserCart.Id).Select(s => new
+                {
+                    s.Id,
+                    s.TotalPrice,
+                    s.Status,
+                    s.IsSuccessDelivery
+                }).ToListAsync();
+                return Ok(new
+                {
+                    status = 200,
+                    listOrders = orders
+                });
+            }
+            catch( Exception ex)
+            {
+                return BadRequest(new ResponseConfigure().CustomResponse("error", ex.Message, "401"));
+            }
+
         }
 
         [Authorize]
