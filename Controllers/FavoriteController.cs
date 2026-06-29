@@ -76,9 +76,12 @@ namespace webResfulAPIs.Controllers
             //EF query
             try
             {
-                var useWithFavorits = await appDbContext.Users.Where(t => t.Public_id == publicId).Include(t => t.Favorites).ThenInclude(t => t.BoardGame).ThenInclude(t => t.BoardGameCategories).ThenInclude(t => t.Category).AsNoTracking().FirstOrDefaultAsync();
+                var useWithFavorits = await appDbContext.Users.Where(t => t.Public_id == publicId)
+                    .Include(t => t.Favorites).ThenInclude(t => t.BoardGame).ThenInclude(t => t.BoardGameImages)
+                    .Include(t=>t.Favorites).ThenInclude(t => t.BoardGame).ThenInclude(t => t.BoardGameCategories)
+                    .ThenInclude(t => t.Category).AsNoTracking().FirstOrDefaultAsync();
 
-                if(useWithFavorits == null)
+                if (useWithFavorits == null)
                 {
                     return NotFound(new ResponseConfigure().CustomResponse("error", "User not found", "404"));
                 }
@@ -91,7 +94,8 @@ namespace webResfulAPIs.Controllers
                     bg.BoardGame.Sold_Quantity,
                     bg.BoardGame.Created_at,
                     bg.BoardGame.Rating,
-                    Categories = bg.BoardGame.BoardGameCategories.Select(bgc => new { bgc.Category_Id, bgc.Category.Name }).ToList()
+                    Categories = bg.BoardGame.BoardGameCategories.Select(bgc => new { bgc.Category_Id, bgc.Category.Name }).ToList(),
+                    Images = bg.BoardGame.BoardGameImages.Select(bgc => new { bgc.Id, bgc.Alt, bgc.Img_Url, bgc.Is_Thumbnail }).ToList()
                 });
 
                 return Ok(new

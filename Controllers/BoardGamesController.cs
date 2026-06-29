@@ -27,7 +27,7 @@ namespace webResfulAPIs.Controllers
             {
                 var description = await appDbContext.BoardGameDescriptions.Where(t => t.BoardGame_Id == guid).FirstOrDefaultAsync();
 
-                var boardGame = await appDbContext.BoardGames.Where(t => t.Id == guid).Include(bg => bg.BoardGameCreators).ThenInclude(bgc => bgc.Creator).Select(
+                var boardGame = await appDbContext.BoardGames.Where(t => t.Id == guid).Include(bg => bg.BoardGameCreators).ThenInclude(bgc => bgc.Creator).Include(bgc=>bgc.BoardGameImages).Select(
                     bg => new
                     {
                         bg.Id,
@@ -49,7 +49,8 @@ namespace webResfulAPIs.Controllers
                         bg.Age_Requirement,
                         Creators = bg.BoardGameCreators.Select(bg => new { bg.Creator.Id, bg.Creator.Name, bg.Creator.Type }).ToList(),
                         Categories = bg.BoardGameCategories.Select(bg => new { bg.Category.Id, bg.Category.Name }).ToList(),
-                        Description = description
+                        Description = description,
+                        Images = bg.BoardGameImages.Select(bgc => new { bgc.Id, bgc.Alt, bgc.Img_Url, bgc.Is_Thumbnail }).ToList()
                     }
                     ).FirstOrDefaultAsync();
                 return Ok(boardGame);
@@ -69,7 +70,7 @@ namespace webResfulAPIs.Controllers
         {
             try
             {
-                var boardGames = await appDbContext.BoardGames.OrderByDescending(t => t.Sold_Quantity).Take(20).Include(bg => bg.BoardGameCategories).ThenInclude(bgc => bgc.Category)
+                var boardGames = await appDbContext.BoardGames.OrderByDescending(t => t.Sold_Quantity).Take(20).Include(bg => bg.BoardGameCategories).ThenInclude(bgc => bgc.Category).Include(t=>t.BoardGameImages)
                .Select(bg => new
                {
                    bg.Id,
@@ -78,7 +79,8 @@ namespace webResfulAPIs.Controllers
                    bg.Sold_Quantity,
                    bg.Created_at,
                    bg.Rating,
-                   Categories = bg.BoardGameCategories.Select(bgc => new { bgc.Category_Id, bgc.Category.Name }).ToList()
+                   Categories = bg.BoardGameCategories.Select(bgc => new { bgc.Category_Id, bgc.Category.Name }).ToList(),
+                   Images = bg.BoardGameImages.Select(bgc => new {bgc.Id,bgc.Alt,bgc.Img_Url,bgc.Is_Thumbnail}).ToList()
                })
                .ToListAsync();
                 return Ok(boardGames);
@@ -98,7 +100,7 @@ namespace webResfulAPIs.Controllers
         {
             try
             {
-                var boardGames = await appDbContext.BoardGames.OrderByDescending(t => t.Created_at).Take(20).Include(bg => bg.BoardGameCategories).ThenInclude(bgc => bgc.Category)
+                var boardGames = await appDbContext.BoardGames.OrderByDescending(t => t.Created_at).Take(20).Include(bg => bg.BoardGameCategories).ThenInclude(bgc => bgc.Category).Include(t => t.BoardGameImages)
                .Select(bg => new
                {
                    bg.Id,
@@ -107,7 +109,8 @@ namespace webResfulAPIs.Controllers
                    bg.Sold_Quantity,
                    bg.Created_at,
                    bg.Rating,
-                   Categories = bg.BoardGameCategories.Select(bgc => new { bgc.Category_Id, bgc.Category.Name }).ToList()
+                   Categories = bg.BoardGameCategories.Select(bgc => new { bgc.Category_Id, bgc.Category.Name }).ToList(),
+                   Images = bg.BoardGameImages.Select(bgc => new { bgc.Id, bgc.Alt, bgc.Img_Url, bgc.Is_Thumbnail }).ToList()
                })
                .ToListAsync();
                 return Ok(boardGames);
@@ -127,7 +130,7 @@ namespace webResfulAPIs.Controllers
         {
             try
             {
-                var boardGames = await appDbContext.BoardGames.OrderByDescending(t => t.Rating).Take(20).Include(bg => bg.BoardGameCategories).ThenInclude(bgc => bgc.Category)
+                var boardGames = await appDbContext.BoardGames.OrderByDescending(t => t.Rating).Take(20).Include(bg => bg.BoardGameCategories).ThenInclude(bgc => bgc.Category).Include(t => t.BoardGameImages)
                .Select(bg => new
                {
                    bg.Id,
@@ -136,7 +139,8 @@ namespace webResfulAPIs.Controllers
                    bg.Sold_Quantity,
                    bg.Created_at,
                    bg.Rating,
-                   Categories = bg.BoardGameCategories.Select(bgc => new { bgc.Category_Id, bgc.Category.Name }).ToList()
+                   Categories = bg.BoardGameCategories.Select(bgc => new { bgc.Category_Id, bgc.Category.Name }).ToList(),
+                   Images = bg.BoardGameImages.Select(bgc => new { bgc.Id, bgc.Alt, bgc.Img_Url, bgc.Is_Thumbnail }).ToList()
                })
                .ToListAsync();
                 return Ok(boardGames);
@@ -156,7 +160,7 @@ namespace webResfulAPIs.Controllers
         {
             try
             {
-                var boardGames = await appDbContext.BoardGames.Include(bg => bg.BoardGameCategories).ThenInclude(bgc => bgc.Category)
+                var boardGames = await appDbContext.BoardGames.Include(bg => bg.BoardGameCategories).ThenInclude(bgc => bgc.Category).Include(t => t.BoardGameImages)
                .Select(bg => new
                {
                    bg.Id,
@@ -165,7 +169,8 @@ namespace webResfulAPIs.Controllers
                    bg.Sold_Quantity,
                    bg.Created_at,
                    bg.Rating,
-                   Categories = bg.BoardGameCategories.Select(bgc => new { bgc.Category_Id, bgc.Category.Name }).ToList()
+                   Categories = bg.BoardGameCategories.Select(bgc => new { bgc.Category_Id, bgc.Category.Name }).ToList(),
+                   Images = bg.BoardGameImages.Select(bgc => new { bgc.Id, bgc.Alt, bgc.Img_Url, bgc.Is_Thumbnail }).ToList()
                })
                .ToListAsync();
                 return Ok(boardGames);
@@ -193,7 +198,7 @@ namespace webResfulAPIs.Controllers
             {
                 var skiCount = Filters.Page * Filters.PageSize;
 
-                var gameFilter = await appDbContext.BoardGames.OrderBy(t => t.Id).Where(q => q.Base_Price <= Filters.Price && q.Max_Time <= Filters.Playtime && q.Rating <= Filters.Rating && q.Complexity <= Filters.Complexity && q.Age_Requirement <= Filters.Age).Skip(skiCount).Take(Filters.PageSize).Include(bg => bg.BoardGameCategories).ThenInclude(bgc => bgc.Category).Select(bg => new
+                var gameFilter = await appDbContext.BoardGames.OrderBy(t => t.Id).Where(q => q.Base_Price <= Filters.Price && q.Max_Time <= Filters.Playtime && q.Rating <= Filters.Rating && q.Complexity <= Filters.Complexity && q.Age_Requirement <= Filters.Age).Skip(skiCount).Take(Filters.PageSize).Include(bg => bg.BoardGameCategories).ThenInclude(bgc => bgc.Category).Include(t => t.BoardGameImages).Select(bg => new
                 {
                     bg.Id,
                     bg.Name,
@@ -201,7 +206,8 @@ namespace webResfulAPIs.Controllers
                     bg.Sold_Quantity,
                     bg.Created_at,
                     bg.Rating,
-                    Categories = bg.BoardGameCategories.Select(bgc => new { bgc.Category_Id, bgc.Category.Name }).ToList()
+                    Categories = bg.BoardGameCategories.Select(bgc => new { bgc.Category_Id, bgc.Category.Name }).ToList(),
+                    Images = bg.BoardGameImages.Select(bgc => new { bgc.Id, bgc.Alt, bgc.Img_Url, bgc.Is_Thumbnail }).ToList()
                 }).ToListAsync();
                 return Ok(new
                 {

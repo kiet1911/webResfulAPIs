@@ -15,6 +15,7 @@ namespace webResfulAPIs.Models
         public virtual DbSet<CartItems> CartItems { get; set; }
         public virtual DbSet<Orders> Orders { get; set; }
         public virtual DbSet<OrderItems> OrderItems { get; set; }
+        public virtual DbSet<BoardGameImages> BoardGameImages { get; set; }
         public AppDbContext(DbContextOptions<AppDbContext> options):base(options) { 
         
         }
