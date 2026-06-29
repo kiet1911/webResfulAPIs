@@ -237,7 +237,7 @@ namespace webResfulAPIs.Controllers
             try
             {
                 var skiCount = searchfilter.Page * searchfilter.PageSize;
-                var gameFilter = await appDbContext.BoardGames.OrderBy(t => t.Id).Where(t => t.Name.Contains(searchfilter.Search.Trim())).Skip(skiCount).Take(searchfilter.PageSize).Select(bg => new
+                var gameFilter = await appDbContext.BoardGames.OrderBy(t => t.Id).Where(t => t.Name.Contains(searchfilter.Search.Trim())).Skip(skiCount).Take(searchfilter.PageSize).Include(t=>t.BoardGameImages).Select(bg => new
                 {
                     bg.Id,
                     bg.Name,
@@ -245,7 +245,8 @@ namespace webResfulAPIs.Controllers
                     bg.Sold_Quantity,
                     bg.Created_at,
                     bg.Rating,
-                    Categories = bg.BoardGameCategories.Select(bgc => new { bgc.Category_Id, bgc.Category.Name }).ToList()
+                    Categories = bg.BoardGameCategories.Select(bgc => new { bgc.Category_Id, bgc.Category.Name }).ToList(),
+                    Images = bg.BoardGameImages.Select(bgc => new { bgc.Id, bgc.Alt, bgc.Img_Url, bgc.Is_Thumbnail }).ToList()
                 }).ToListAsync();
                 return Ok(new
                 {
